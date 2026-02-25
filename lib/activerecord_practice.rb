@@ -21,12 +21,66 @@ class Customer < ApplicationRecord
   #  You should NOT need to call Ruby library functions for sorting, filtering, etc.
 
   def self.any_candice
-    # YOUR CODE HERE to return all customer(s) whose first name is Candice
-    # probably something like:  Customer.where(....)
+    Customer.where(first: 'Candice')
   end
 
   def self.with_valid_email
-    # YOUR CODE HERE to return only customers with valid email addresses (containing '@')
+    Customer.where('email like "%@%"')
   end
-  # etc. - see README.md for more details
+
+  def self.with_dot_org_email
+    Customer.where('email like "%.org"')
+  end
+
+  def self.with_invalid_email
+    Customer.where('email NOT like "%@%"').where('email NOT like ""')
+  end
+
+  def self.with_blank_email
+    Customer.where(email: nil)
+  end
+
+  def self.born_before_1980
+    Customer.where("birthdate < ?", Date.new(1980, 1, 1))
+  end
+
+  def self.with_valid_email_and_born_before_1980
+    Customer.where('email like "%@%"').where("birthdate < ?", Date.new(1980, 1, 1))
+  end
+
+  def self.last_names_starting_with_b
+    b = Customer.where('last like "b%"')
+    b.order(:birthdate)
+  end
+
+  def self.twenty_youngest
+    ordered = Customer.order(birthdate: :desc)
+    ordered.limit(20)
+  end
+
+  def self.update_gussie_murray_birthdate
+    murray = find_by(first: 'Gussie', last: 'Murray')
+    murray.birthdate = Time.parse('2004-02-08')
+    murray.save
+  end
+
+  def self.change_all_invalid_emails_to_blank
+    invalid = Customer.where('email NOT like "%@%"').where('email NOT like ""')
+    invalid.each do |i|
+      i.email = nil
+      i.save
+    end
+  end
+
+  def self.delete_meggie_herman
+    maggie = find_by(first: 'Meggie', last: 'Herman')
+    maggie.destroy
+  end
+
+  def self.delete_everyone_born_before_1978
+    customers = Customer.where("birthdate < ?", Date.new(1978, 1, 1))
+    customers.each do |c|
+      c.destroy
+    end
+  end
 end
